@@ -1,4 +1,4 @@
-use except_plugin::{SupperBuilder, BuilderImpl, ExceptionLevel};
+use except_plugin::{SupperBuilder, ExceptionLevel};
 
 pub fn test_super_builder() {
     let mut builder = SupperBuilder::new();

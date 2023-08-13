@@ -1,4 +1,4 @@
-//! # Super Exception
+//! # Exception Core
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/8/13
@@ -18,6 +18,7 @@ pub use builder::*;
 
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
+use std::path::PathBuf;
 
 /// # Exception trait
 /// each exception should impl this trait
@@ -30,6 +31,11 @@ pub trait Exception: Error {
     fn set_code(&mut self, code: u32) -> ();
     fn set_msg(&mut self, msg: &str) -> ();
     fn set_level(&mut self, level: ExceptionLevel) -> ();
+    fn get_type(&self) -> Exceptions;
+    fn line(&self) -> u32;
+    fn path(&self) -> PathBuf;
+    fn set_line(&mut self, line: u32) -> ();
+    fn set_path(&mut self, path: PathBuf) -> ();
 }
 
 /// # Exceptions enum
@@ -45,6 +51,7 @@ pub trait Exception: Error {
 /// - ClassCastException（类转换异常）：当试图将一个对象强制转换为其不兼容的类型时抛出。
 /// - UnsupportedOperationException（不支持的操作异常）：当调用对象不支持的方法或操作时抛出。
 /// - Define（自定义异常）：当自己定义非上访的异常时。
+#[derive(Debug, Clone, PartialEq)]
 pub enum Exceptions {
     Super,
     NullPointer,
@@ -106,7 +113,32 @@ pub enum ExceptionLevel {
 }
 
 /// # Supper Exception
-/// top of the all lower exceptions , you can get this from all lower exceptions' recover param
+/// It is the top-level implementation of all exceptions , you can get this from all more specific exceptions' recover param
+/// > Although it is the parent of all exceptions, it is actually the lowest level exception
+/// ## example
+/// ```rust
+/// use std::error::Error;
+/// use except_plugin::{SupperBuilder, BuilderImpl, ExceptionLevel, SupperException, Exception, NewFrom};
+///
+/// pub fn test_super_exception_result() -> Result<(), Box<dyn Error>> {
+///     let mut e = SupperException::new()
+///         .set_code(101)
+///         .set_msg("this is a super exception")
+///         .set_level(ExceptionLevel::Error)
+///         .build();
+///     e.set_msg("change super exception");
+///     let e =  e.deref_mut();
+///     Err(Box::new(e))
+/// }
+///
+/// fn main() {
+///     let res = test_super_exception_result();
+///     match res {
+///         Ok(_) => (),
+///         Err(e) => println!("{:?}", e.description())
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct SupperException {
     code: u32,
@@ -130,6 +162,7 @@ impl NewFrom for SupperException {
 }
 
 impl Exception for SupperException {
+
     fn code(&self) -> u32 {
         self.code
     }
@@ -151,6 +184,27 @@ impl Exception for SupperException {
     fn set_msg(&mut self, msg: &str) -> () {
         self.msg = String::from(msg);
     }
+    fn get_type(&self) -> Exceptions {
+        Exceptions::Super
+    }
+    fn line(&self) -> u32 {
+        0
+    }
+    fn path(&self) -> PathBuf {
+        PathBuf::new()
+    }
+    fn set_path(&mut self, path: PathBuf) -> () {}
+    fn set_line(&mut self, line: u32) -> () {}
+}
+
+impl SupperException {
+    pub fn deref_mut(&mut self) -> Self {
+        SupperException {
+            code: self.code(),
+            msg: String::from(self.msg()),
+            level: self.level(),
+        }
+    }
 }
 
 impl Error for SupperException {
@@ -165,7 +219,6 @@ impl Display for SupperException {
     }
 }
 
-
 impl Default for SupperException {
     fn default() -> Self {
         SupperException {
@@ -174,4 +227,27 @@ impl Default for SupperException {
             level: ExceptionLevel::Info,
         }
     }
+}
+
+/// # Generate NewFrom impl for specific exception
+#[macro_export]
+macro_rules! e_new_from_impl {
+    ($E:tt,$Builder:tt) => {
+        impl NewFrom for $E {
+            type Builder = $Builder;
+
+            fn new() -> Self::Builder {
+                $Builder::new()
+            }
+            fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
+                $E {
+                    code: e.code(),
+                    msg: String::from(e.msg()),
+                    level: e.level(),
+                    line: e.line(),
+                    path: e.path(),
+                }
+            }
+        }
+    };
 }
