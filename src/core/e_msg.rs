@@ -8,5 +8,6 @@
 //! ```
 
 pub const SUPPER_MSG: &str = "SupperException: this exception cannot match any error , if you want to fix , you should use lower level exception!";
+pub const EASY_MSG: &str = "EasyException: this is an easy exception!";
 pub const NULL_POINTER_MSG: &str = "NullPointerException: if you see this exception , you may have a null pointer exception , please check!";
-// pub const NULL_POINTER_MSG: &str = "NullPointerException: if you see this exception , you may have a null pointer exception , please check!";
+

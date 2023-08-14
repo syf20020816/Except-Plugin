@@ -8,9 +8,8 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use std::error::Error;
 use std::path::PathBuf;
-use super::{SuperException, Exception, ExceptionLevel, ExceptionCode, SUPPER_MSG, Exceptions};
+use super::{Exception, ExceptionLevel, Exceptions};
 
 
 /// # New or From Exception
@@ -37,8 +36,8 @@ pub trait NewFrom {
     /// create a new Exception
     fn new() -> Self::Builder;
     /// create a new Exception from any Exception
-    /// - can convert from : supper|lower
-    fn from(e: Box<dyn Exception>) -> Self where Self: Sized;
+    /// - can convert from : supper
+    fn from_super(e: Box<dyn Exception>) -> Self where Self: Sized;
 }
 
 /// # deref the exception
@@ -55,8 +54,8 @@ pub trait NewFrom {
 ///         }
 ///     }
 /// }
-pub trait DerefException{
-    fn deref_mut_exception(&mut self)->Self;
+pub trait DerefException {
+    fn deref_mut_exception(&mut self) -> Self;
 }
 
 /// # convert builder to exception
@@ -94,7 +93,7 @@ pub trait SuperBuilderImpl<T> {
     fn build(&mut self) -> T;
 }
 
-pub trait CommonBuilderImpl {
+pub trait CommonParamImpl {
     fn line(&self) -> u32;
     fn path(&self) -> PathBuf;
     fn set_line(&mut self, line: u32) -> &mut Self;
@@ -106,6 +105,9 @@ pub trait TargetParam {
     fn set_target(&mut self, target: &str) -> &mut Self;
 }
 
+//------------------------------------------------------------
+
+//------------------------------------------------------------
 /// # generate SuperBuilderImpl for each Builder
 /// it will generate implementations for each builder
 /// ## example
@@ -230,9 +232,4 @@ macro_rules! e_new_from_impl {
     };
 }
 
-
-// pub trait FromDyn {
-//     /// dyn create a new Exception
-//     fn from_dyn(f: impl Fn()) -> Self;
-// }
 

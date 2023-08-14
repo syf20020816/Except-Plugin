@@ -8,9 +8,11 @@
 
 mod e_msg;
 mod flex_impl;
+mod easy;
 mod null_pointer;
 mod builder;
 
+pub use easy::EasyException;
 pub use null_pointer::NullPointerException;
 pub use flex_impl::*;
 pub use e_msg::*;
@@ -18,8 +20,7 @@ pub use builder::*;
 
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use std::path::PathBuf;
-use crate::{display_err_impl,exception_impl};
+use crate::{display_err_impl, exception_impl};
 
 
 /// # Exception trait
@@ -158,13 +159,13 @@ pub struct SuperException {
     level: ExceptionLevel,
 }
 
+
 impl NewFrom for SuperException {
     type Builder = SuperBuilder;
-
     fn new() -> Self::Builder {
         SuperBuilder::new()
     }
-    fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
+    fn from_super(e: Box<dyn Exception>) -> Self where Self: Sized {
         SuperException {
             code: e.code(),
             msg: String::from(e.msg()),

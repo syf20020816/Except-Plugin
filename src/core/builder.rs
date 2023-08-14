@@ -8,10 +8,12 @@
 
 use std::ops::Deref;
 use std::path::PathBuf;
-use crate::core::Exceptions;
-use crate::core::null_pointer::NullPointerException;
-use crate::{Exception, builder_impl};
-use super::{SuperException, ExceptionLevel, SUPPER_MSG, ExceptionCode, FromBuilder, SuperBuilderImpl};
+use crate::{builder_impl};
+use crate::core::{CommonParamImpl, NullPointerException, TargetParam};
+use super::{
+    SuperException, Exceptions, ExceptionLevel, SUPPER_MSG, EASY_MSG,
+    ExceptionCode, FromBuilder, SuperBuilderImpl, EasyException,
+};
 
 /// # 异常工厂
 ///
@@ -35,48 +37,6 @@ pub struct SuperBuilder {
 
 builder_impl!(SuperBuilder,SuperException);
 
-
-// impl SuperBuilderImpl for SuperBuilder {
-//     type Output = SuperException;
-//
-//     fn new() -> Self {
-//         Default::default()
-//     }
-//
-//     fn code(&self) -> u32 {
-//         self.code
-//     }
-//
-//     fn msg(&self) -> &str {
-//         &self.msg
-//     }
-//
-//     fn level(&self) -> ExceptionLevel {
-//         self.level.clone()
-//     }
-//
-//     fn set_code(&mut self, code: u32) -> &mut Self {
-//         self.code = code;
-//         self
-//     }
-//
-//     fn set_msg(&mut self, msg: &str) -> &mut Self {
-//         self.msg = String::from(msg);
-//         self
-//     }
-//
-//     fn set_level(&mut self, level: ExceptionLevel) -> &mut Self {
-//         self.level = level;
-//         self
-//     }
-//     fn exception_type(&self) -> Exceptions {
-//         self.e_type.clone()
-//     }
-//     fn build(&mut self) -> Self::Output {
-//         Self::Output::from_builder(self.deref())
-//     }
-// }
-
 impl Default for SuperBuilder {
     fn default() -> Self {
         SuperBuilder {
@@ -89,81 +49,102 @@ impl Default for SuperBuilder {
 }
 
 
-//
-// #[derive(Clone, Debug, PartialEq)]
-// pub struct ExceptionBuilder {
-//     code: u32,
-//     msg: String,
-//     level: ExceptionLevel,
-//     line: u32,
-//     path: PathBuf,
-//     exception_type: Exceptions,
-// }
-//
-// impl BuilderImpl for ExceptionBuilder {
-//     fn new(exception_type: Exceptions) -> Self {
-//         ExceptionBuilder {
-//             code: ExceptionCode::SUPPER,
-//             msg: String::from(SUPPER_MSG),
-//             level: ExceptionLevel::Info,
-//             line: 0,
-//             path: PathBuf::new(),
-//             exception_type,
-//         }
-//     }
-//     fn code(&self) -> u32 {
-//         self.code
-//     }
-//
-//     fn msg(&self) -> &str {
-//         &self.msg
-//     }
-//
-//     fn level(&self) -> ExceptionLevel {
-//         self.level.clone()
-//     }
-//
-//     fn set_code(&mut self, code: u32) -> &mut Self {
-//         self.code = code;
-//         self
-//     }
-//
-//     fn set_msg(&mut self, msg: &str) -> &mut Self {
-//         self.msg = String::from(msg);
-//         self
-//     }
-//
-//     fn set_level(&mut self, level: ExceptionLevel) -> &mut Self {
-//         self.level = level;
-//         self
-//     }
-//     fn line(&self) -> u32 {
-//         self.line
-//     }
-//     fn path(&self) -> PathBuf {
-//         self.path.clone()
-//     }
-//     fn set_line(&mut self, line: u32) -> &mut Self {
-//         self.line = line;
-//         self
-//     }
-//     fn set_path(&mut self, path: PathBuf) -> &mut Self {
-//         self.path = path;
-//         self
-//     }
-//     fn exception_type(&self) -> Exceptions {
-//         self.exception_type.clone()
-//     }
-//     fn build(&mut self) -> Box<dyn Exception> {
-//         match self.exception_type {
-//             Exceptions::Super => panic!("please use SuperBuilder"),
-//             Exceptions::NullPointer => {
-//                 Box::new(
-//                     NullPointerException::from_builder(self)
-//                 )
-//             }
-//             _ => panic!("no")
-//         }
-//     }
-// }
+#[derive(Clone, Debug, PartialEq)]
+pub struct EasyExceptionBuilder {
+    code: u32,
+    msg: String,
+    level: ExceptionLevel,
+    line: u32,
+    path: PathBuf,
+    e_type: Exceptions,
+}
 
+impl Default for EasyExceptionBuilder {
+    fn default() -> Self {
+        EasyExceptionBuilder {
+            code: ExceptionCode::COMMON,
+            msg: String::from(EASY_MSG),
+            level: ExceptionLevel::Info,
+            line: 0,
+            path: PathBuf::new(),
+            e_type: Exceptions::Easy,
+        }
+    }
+}
+
+builder_impl!(EasyExceptionBuilder,EasyException);
+
+impl CommonParamImpl for EasyExceptionBuilder {
+    fn path(&self) -> PathBuf {
+        self.path.clone()
+    }
+    fn line(&self) -> u32 {
+        self.line
+    }
+    fn set_path(&mut self, path: PathBuf) -> &mut Self {
+        self.path = path;
+        self
+    }
+    fn set_line(&mut self, line: u32) -> &mut Self {
+        self.line = line;
+        self
+    }
+}
+
+//----------------------------------------------------------------
+#[derive(Clone, Debug, PartialEq)]
+pub struct NullPointerExceptionBuilder {
+    code: u32,
+    msg: String,
+    level: ExceptionLevel,
+    line: u32,
+    path: PathBuf,
+    target: Option<String>,
+    e_type: Exceptions,
+}
+
+impl Default for NullPointerExceptionBuilder {
+    fn default() -> Self {
+        NullPointerExceptionBuilder {
+            code: ExceptionCode::COMMON,
+            msg: String::from(EASY_MSG),
+            level: ExceptionLevel::Info,
+            line: 0,
+            path: PathBuf::new(),
+            target: None,
+            e_type: Exceptions::Easy,
+        }
+    }
+}
+
+builder_impl!(NullPointerExceptionBuilder,NullPointerException);
+
+impl CommonParamImpl for NullPointerExceptionBuilder {
+    fn path(&self) -> PathBuf {
+        self.path.clone()
+    }
+    fn line(&self) -> u32 {
+        self.line
+    }
+    fn set_path(&mut self, path: PathBuf) -> &mut Self {
+        self.path = path;
+        self
+    }
+    fn set_line(&mut self, line: u32) -> &mut Self {
+        self.line = line;
+        self
+    }
+}
+
+impl TargetParam for NullPointerExceptionBuilder {
+    fn target(&self) -> &str {
+        match self.target {
+            Some(ref s) => s.as_str(),
+            None => ""
+        }
+    }
+    fn set_target(&mut self, target: &str) -> &mut Self {
+        self.target = Some(target.to_string());
+        self
+    }
+}

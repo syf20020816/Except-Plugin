@@ -8,11 +8,10 @@
 //! ```
 
 use std::error::Error;
-use std::fmt::{Display, Formatter};
 use std::path::{PathBuf};
-use crate::core::Exceptions;
-use super::{ExceptionLevel};
-use crate::{display_err_impl, exception_impl};
+use std::fmt::{Debug, Display, Formatter};
+use super::{SuperBuilderImpl, ExceptionLevel, NewFrom, FromBuilder, CommonParamImpl, TargetParam, Exception, Exceptions, NullPointerExceptionBuilder, NULL_POINTER_MSG, ExceptionCode, DerefException};
+use crate::{display_err_impl,  exception_impl};
 
 /// # NullPointerException
 /// - code: exception code
@@ -20,6 +19,7 @@ use crate::{display_err_impl, exception_impl};
 /// - line: error line
 /// - path: error file path
 /// - level: exception level
+/// - target: null pointer target
 #[derive(Debug, Clone, PartialEq)]
 pub struct NullPointerException {
     code: u32,
@@ -27,52 +27,98 @@ pub struct NullPointerException {
     line: u32,
     path: PathBuf,
     level: ExceptionLevel,
+    target: Option<String>,
 }
 
-// impl NewFrom for NullPointerException {
-//     type Builder = ExceptionBuilder;
-//     fn new() -> Self::Builder {
-//         ExceptionBuilder::new(Exceptions::NullPointer)
-//     }
-//     fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
-//         NullPointerException {
-//             code: e.code(),
-//             msg: String::from(e.msg()),
-//             line: e.line(),
-//             path: e.path(),
-//             level: e.level(),
-//         }
-//     }
-// }
-//
-// impl FromBuilder for NullPointerException {
-//     type Input = ExceptionBuilder;
-//     type Output = NullPointerException;
-//     fn from_builder(builder: &mut Self::Input) -> Self::Output {
-//         Self::Output {
-//             code: builder.code(),
-//             msg: String::from(builder.msg()),
-//             line: builder.line(),
-//             path: builder.path(),
-//             level: builder.level(),
-//         }
-//     }
-// }
-//
-// display_err_impl!(NullPointerException);
-// exception_impl!(NullPointerException);
-//
-//
-// impl Default for NullPointerException {
-//     fn default() -> Self {
-//         NullPointerException {
-//             code: ExceptionCode::NULL_POINTER,
-//             msg: String::from(NULL_POINTER_MSG),
-//             line: 0,
-//             path: PathBuf::new(),
-//             level: ExceptionLevel::Info,
-//         }
-//     }
-// }
+impl Default for NullPointerException {
+    fn default() -> Self {
+        NullPointerException {
+            code: ExceptionCode::NULL_POINTER,
+            msg: String::from(NULL_POINTER_MSG),
+            line: 0,
+            path: PathBuf::new(),
+            level: ExceptionLevel::Info,
+            target: None,
+        }
+    }
+}
 
-// e_new_from_impl! {NullPointerException,SupperBuilder}
+impl NewFrom for NullPointerException {
+    type Builder = NullPointerExceptionBuilder;
+    fn new() -> Self::Builder {
+        NullPointerExceptionBuilder::new()
+    }
+    fn from_super(e: Box<dyn Exception>) -> Self where Self: Sized {
+        NullPointerException {
+            code: e.code(),
+            msg: String::from(e.msg()),
+            level: e.level(),
+            path: PathBuf::new(),
+            line: 0,
+            target: None,
+        }
+    }
+}
+
+impl FromBuilder for NullPointerException {
+    type Input = NullPointerExceptionBuilder;
+    type Output = NullPointerException;
+    fn from_builder(builder: &Self::Input) -> Self::Output {
+        Self::Output {
+            code: builder.code(),
+            msg: String::from(builder.msg()),
+            level: builder.level(),
+            line: builder.line(),
+            path: builder.path(),
+            target: Some(builder.target().to_string()),
+        }
+    }
+}
+
+display_err_impl!(NullPointerException);
+
+exception_impl!(NullPointerException,Exceptions::NullPointer);
+
+impl CommonParamImpl for NullPointerException {
+    fn line(&self) -> u32 {
+        self.line
+    }
+    fn path(&self) -> PathBuf {
+        self.path.clone()
+    }
+    fn set_path(&mut self, path: PathBuf) -> &mut Self {
+        self.path = path;
+        self
+    }
+    fn set_line(&mut self, line: u32) -> &mut Self {
+        self.line = line;
+        self
+    }
+}
+
+impl TargetParam for NullPointerException {
+    fn target(&self) -> &str {
+        match self.target {
+            Some(ref s)=>s.as_str(),
+            None=>""
+        }
+    }
+    fn set_target(&mut self, target: &str) -> &mut Self {
+        self.target = Some(target.to_string());
+        self
+    }
+}
+
+impl DerefException for NullPointerException {
+    fn deref_mut_exception(&mut self) -> Self {
+        NullPointerException {
+            code: self.code(),
+            msg: String::from(self.msg()),
+            line: self.line(),
+            path: self.path(),
+            level: self.level(),
+            target: Some(self.target().to_string()),
+        }
+    }
+}
+
