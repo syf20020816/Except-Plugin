@@ -11,7 +11,7 @@ mod flex_impl;
 mod null_pointer;
 mod builder;
 
-
+pub use null_pointer::NullPointerException;
 pub use flex_impl::*;
 pub use e_msg::*;
 pub use builder::*;
@@ -19,6 +19,8 @@ pub use builder::*;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::path::PathBuf;
+use crate::{display_err_impl,exception_impl};
+
 
 /// # Exception trait
 /// each exception should impl this trait
@@ -32,10 +34,6 @@ pub trait Exception: Error {
     fn set_msg(&mut self, msg: &str) -> ();
     fn set_level(&mut self, level: ExceptionLevel) -> ();
     fn get_type(&self) -> Exceptions;
-    fn line(&self) -> u32;
-    fn path(&self) -> PathBuf;
-    fn set_line(&mut self, line: u32) -> ();
-    fn set_path(&mut self, path: PathBuf) -> ();
 }
 
 /// # Exceptions enum
@@ -54,6 +52,7 @@ pub trait Exception: Error {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Exceptions {
     Super,
+    Easy,
     NullPointer,
     ArrayIndexOutOfBounds,
     IllegalArgument,
@@ -118,42 +117,55 @@ pub enum ExceptionLevel {
 /// ## example
 /// ```rust
 /// use std::error::Error;
-/// use except_plugin::{SupperBuilder, BuilderImpl, ExceptionLevel, SupperException, Exception, NewFrom};
+/// use except_plugin::{SuperBuilder, SuperException, ExceptionFactory, Exceptions, SuperBuilderImpl, ExceptionLevel, Exception, DerefException};
 ///
-/// pub fn test_super_exception_result() -> Result<(), Box<dyn Error>> {
-///     let mut e = SupperException::new()
-///         .set_code(101)
-///         .set_msg("this is a super exception")
-///         .set_level(ExceptionLevel::Error)
+/// pub fn test_super_exception() {
+///     // use ExceptionFactory -> get SuperBuilder -> build SuperException
+///     let e = ExceptionFactory::new::<SuperException, SuperBuilder>()
+///         .set_code(1006)
+///         .set_msg("super builder")
+///         .set_level(ExceptionLevel::Fatal)
 ///         .build();
-///     e.set_msg("change super exception");
-///     let e =  e.deref_mut();
-///     Err(Box::new(e))
+///     dbg!(e);
 /// }
 ///
+/// pub fn test_super_exception_result() -> Result<(), Box<dyn Error>> {
+///     // build a exception
+///     let mut e = ExceptionFactory::new::<SuperException, SuperBuilder>()
+///         .set_code(1006)
+///         .set_msg("super builder")
+///         .set_level(ExceptionLevel::Fatal)
+///         .build();
+///     e.set_msg("this is a super exception!");
+///     let e =  e.deref_mut_exception();
+///     Err(Box::new(e))
+/// }
 /// fn main() {
-///     let res = test_super_exception_result();
-///     match res {
-///         Ok(_) => (),
-///         Err(e) => println!("{:?}", e.description())
+///     test_super_exception();
+///     let e = test_super_exception_result();
+///     match e {
+///         Ok(_) => {}
+///         Err(err) => {
+///             println!("{:?}", err.description());
+///         }
 ///     }
 /// }
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct SupperException {
+pub struct SuperException {
     code: u32,
     msg: String,
     level: ExceptionLevel,
 }
 
-impl NewFrom for SupperException {
-    type Builder = SupperBuilder;
+impl NewFrom for SuperException {
+    type Builder = SuperBuilder;
 
     fn new() -> Self::Builder {
-        SupperBuilder::new()
+        SuperBuilder::new()
     }
     fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
-        SupperException {
+        SuperException {
             code: e.code(),
             msg: String::from(e.msg()),
             level: e.level(),
@@ -161,45 +173,25 @@ impl NewFrom for SupperException {
     }
 }
 
-impl Exception for SupperException {
-
-    fn code(&self) -> u32 {
-        self.code
+impl FromBuilder for SuperException {
+    type Output = SuperException;
+    type Input = SuperBuilder;
+    fn from_builder(builder: &Self::Input) -> Self::Output {
+        Self::Output {
+            code: builder.code(),
+            msg: String::from(builder.msg()),
+            level: builder.level(),
+        }
     }
-
-    fn msg(&self) -> &str {
-        &self.msg
-    }
-
-    fn level(&self) -> ExceptionLevel {
-        self.level.clone()
-    }
-
-    fn set_code(&mut self, code: u32) -> () {
-        self.code = code;
-    }
-    fn set_level(&mut self, level: ExceptionLevel) -> () {
-        self.level = level;
-    }
-    fn set_msg(&mut self, msg: &str) -> () {
-        self.msg = String::from(msg);
-    }
-    fn get_type(&self) -> Exceptions {
-        Exceptions::Super
-    }
-    fn line(&self) -> u32 {
-        0
-    }
-    fn path(&self) -> PathBuf {
-        PathBuf::new()
-    }
-    fn set_path(&mut self, path: PathBuf) -> () {}
-    fn set_line(&mut self, line: u32) -> () {}
 }
 
-impl SupperException {
-    pub fn deref_mut(&mut self) -> Self {
-        SupperException {
+display_err_impl!(SuperException);
+
+exception_impl!(SuperException,Exceptions::Super);
+
+impl DerefException for SuperException {
+    fn deref_mut_exception(&mut self) -> Self {
+        SuperException {
             code: self.code(),
             msg: String::from(self.msg()),
             level: self.level(),
@@ -207,21 +199,9 @@ impl SupperException {
     }
 }
 
-impl Error for SupperException {
-    fn description(&self) -> &str {
-        self.msg()
-    }
-}
-
-impl Display for SupperException {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self, f)
-    }
-}
-
-impl Default for SupperException {
+impl Default for SuperException {
     fn default() -> Self {
-        SupperException {
+        SuperException {
             code: ExceptionCode::SUPPER,
             msg: String::from(SUPPER_MSG),
             level: ExceptionLevel::Info,
@@ -229,25 +209,3 @@ impl Default for SupperException {
     }
 }
 
-/// # Generate NewFrom impl for specific exception
-#[macro_export]
-macro_rules! e_new_from_impl {
-    ($E:tt,$Builder:tt) => {
-        impl NewFrom for $E {
-            type Builder = $Builder;
-
-            fn new() -> Self::Builder {
-                $Builder::new()
-            }
-            fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
-                $E {
-                    code: e.code(),
-                    msg: String::from(e.msg()),
-                    level: e.level(),
-                    line: e.line(),
-                    path: e.path(),
-                }
-            }
-        }
-    };
-}

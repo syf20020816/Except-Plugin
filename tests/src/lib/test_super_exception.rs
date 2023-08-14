@@ -1,29 +1,24 @@
 use std::error::Error;
-use except_plugin::{SupperBuilder, ExceptionLevel, SupperException, Exception, NewFrom};
+use except_plugin::{SuperBuilder, SuperException, ExceptionFactory, Exceptions, SuperBuilderImpl, ExceptionLevel, Exception, DerefException};
 
 pub fn test_super_exception() {
-    let mut builder = SupperBuilder::new();
-    let builder = builder
-        .set_code(10086)
-        .set_msg("supper exp")
-        .set_level(ExceptionLevel::Warn)
+    // use ExceptionFactory -> get SuperBuilder -> build SuperException
+    let e = ExceptionFactory::new::<SuperException, SuperBuilder>()
+        .set_code(1006)
+        .set_msg("super builder")
+        .set_level(ExceptionLevel::Fatal)
         .build();
-    let exception = SupperException::new()
-        .set_code(10086)
-        .set_msg("supper exp")
-        .set_level(ExceptionLevel::Warn)
-        .build();
-    dbg!(builder);
-    dbg!(exception);
+    dbg!(e);
 }
 
 pub fn test_super_exception_result() -> Result<(), Box<dyn Error>> {
-    let mut e = SupperException::new()
-        .set_code(101)
-        .set_msg("this is a super exception")
-        .set_level(ExceptionLevel::Error)
+    // build a exception
+    let mut e = ExceptionFactory::new::<SuperException, SuperBuilder>()
+        .set_code(1006)
+        .set_msg("super builder")
+        .set_level(ExceptionLevel::Fatal)
         .build();
-    e.set_msg("change super exception");
-    let e =  e.deref_mut();
+    e.set_msg("this is a super exception!");
+    let e =  e.deref_mut_exception();
     Err(Box::new(e))
 }

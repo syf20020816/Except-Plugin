@@ -40,7 +40,6 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-
 mod core;
 
-pub use crate::core::{SupperBuilder, ExceptionLevel, SupperException, Exception, NewFrom};
+pub use crate::core::{SuperBuilder, ExceptionLevel, SuperException, Exception, NewFrom, ExceptionFactory, Exceptions, SuperBuilderImpl, DerefException};
