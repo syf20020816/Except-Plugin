@@ -17,6 +17,20 @@ use super::{SuperException, Exception, ExceptionLevel, ExceptionCode, SUPPER_MSG
 /// Use this trait to create an Exception
 /// ## example
 /// ```rust
+/// impl NewFrom for SuperException {
+///     type Builder = SuperBuilder;
+///
+///     fn new() -> Self::Builder {
+///         SuperBuilder::new()
+///     }
+///     fn from(e: Box<dyn Exception>) -> Self where Self: Sized {
+///         SuperException {
+///             code: e.code(),
+///             msg: String::from(e.msg()),
+///             level: e.level(),
+///         }
+///     }
+/// }
 /// ```
 pub trait NewFrom {
     type Builder;
@@ -27,12 +41,43 @@ pub trait NewFrom {
     fn from(e: Box<dyn Exception>) -> Self where Self: Sized;
 }
 
+/// # deref the exception
+/// convert &mut self to Self
+/// - impl each exception
+/// ## example
+/// ```rust
+/// impl DerefException for SuperException {
+///     fn deref_mut_exception(&mut self) -> Self {
+///         SuperException {
+///             code: self.code(),
+///             msg: String::from(self.msg()),
+///             level: self.level(),
+///         }
+///     }
+/// }
 pub trait DerefException{
     fn deref_mut_exception(&mut self)->Self;
 }
 
+/// # convert builder to exception
+/// ## example
+/// ```rust
+/// impl FromBuilder for SuperException {
+///     type Output = SuperException;
+///     type Input = SuperBuilder;
+///     fn from_builder(builder: &Self::Input) -> Self::Output {
+///         Self::Output {
+///             code: builder.code(),
+///             msg: String::from(builder.msg()),
+///             level: builder.level(),
+///         }
+///     }
+/// }
+/// ```
 pub trait FromBuilder {
+    /// builder type
     type Input;
+    /// exception type
     type Output;
     fn from_builder(builder: &Self::Input) -> Self::Output;
 }
@@ -61,6 +106,14 @@ pub trait TargetParam {
     fn set_target(&mut self, target: &str) -> &mut Self;
 }
 
+/// # generate SuperBuilderImpl for each Builder
+/// it will generate implementations for each builder
+/// ## example
+/// ```rust
+/// use crate::builder_impl;
+///
+/// builder_impl!(SuperBuilder,SuperException);
+/// ```
 #[macro_export]
 macro_rules! builder_impl {
     ($Builder:tt,$Output:tt) => {
@@ -106,6 +159,7 @@ macro_rules! builder_impl {
     };
 }
 
+/// generate display and error for all exceptions
 #[macro_export]
 macro_rules! display_err_impl {
     ($E:tt) => {
@@ -123,6 +177,7 @@ macro_rules! display_err_impl {
     };
 }
 
+/// generate impl Exception for each Exception
 #[macro_export]
 macro_rules! exception_impl {
     ($E:tt,$EType:expr) => {

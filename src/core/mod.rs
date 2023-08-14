@@ -184,7 +184,7 @@ impl FromBuilder for SuperException {
         }
     }
 }
-
+//generate display and error for SuperException
 display_err_impl!(SuperException);
 
 exception_impl!(SuperException,Exceptions::Super);
