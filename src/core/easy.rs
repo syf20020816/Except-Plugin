@@ -6,7 +6,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-
+use std::time::{SystemTime,Duration,UNIX_EPOCH};
 use std::path::PathBuf;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
@@ -26,6 +26,7 @@ pub struct EasyException {
     line: u32,
     path: PathBuf,
     level: ExceptionLevel,
+    timestamp: Duration,
 }
 
 impl Default for EasyException {
@@ -36,6 +37,7 @@ impl Default for EasyException {
             line: 0,
             path: PathBuf::new(),
             level: ExceptionLevel::Info,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
         }
     }
 }
@@ -52,6 +54,7 @@ impl NewFrom for EasyException {
             level: e.level(),
             path: PathBuf::new(),
             line: 0,
+            timestamp: e.timestamp()
         }
     }
 }
@@ -66,6 +69,7 @@ impl FromBuilder for EasyException {
             level: builder.level(),
             line: builder.line(),
             path: builder.path(),
+            timestamp: builder.timestamp()
         }
     }
 }
@@ -84,6 +88,7 @@ impl DerefException for EasyException {
             line: self.line(),
             path: self.path(),
             level: self.level(),
+            timestamp: self.timestamp()
         }
     }
 }

@@ -6,7 +6,7 @@
 //! @description:
 //! ```
 
-
+use std::time::{SystemTime,Duration,UNIX_EPOCH};
 use std::error::Error;
 use std::path::{PathBuf};
 use std::fmt::{Debug, Display, Formatter};
@@ -32,6 +32,7 @@ pub struct ArrayIndexOutOfBoundsException {
     target: Option<String>,
     len: usize,
     index: usize,
+    timestamp:Duration,
 }
 
 impl Default for ArrayIndexOutOfBoundsException {
@@ -45,6 +46,7 @@ impl Default for ArrayIndexOutOfBoundsException {
             target: None,
             len: 0,
             index: 0,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
         }
     }
 }
@@ -64,6 +66,7 @@ impl NewFrom for ArrayIndexOutOfBoundsException {
             target: None,
             len: 0,
             index: 0,
+            timestamp: e.timestamp()
         }
     }
 }
@@ -81,6 +84,7 @@ impl FromBuilder for ArrayIndexOutOfBoundsException {
             target: Some(builder.target().to_string()),
             len: builder.len(),
             index: builder.index(),
+            timestamp: builder.timestamp()
         }
     }
 }
@@ -106,6 +110,7 @@ impl DerefException for ArrayIndexOutOfBoundsException {
             target: Some(self.target().to_string()),
             len: self.len(),
             index: self.index(),
+            timestamp: self.timestamp()
         }
     }
 }

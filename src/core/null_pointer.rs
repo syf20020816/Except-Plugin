@@ -6,7 +6,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-
+use std::time::{SystemTime,Duration,UNIX_EPOCH};
 use std::error::Error;
 use std::path::{PathBuf};
 use std::fmt::{Debug, Display, Formatter};
@@ -28,6 +28,7 @@ pub struct NullPointerException {
     path: PathBuf,
     level: ExceptionLevel,
     target: Option<String>,
+    timestamp: Duration,
 }
 
 impl Default for NullPointerException {
@@ -39,6 +40,7 @@ impl Default for NullPointerException {
             path: PathBuf::new(),
             level: ExceptionLevel::Info,
             target: None,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
         }
     }
 }
@@ -56,6 +58,7 @@ impl NewFrom for NullPointerException {
             path: PathBuf::new(),
             line: 0,
             target: None,
+            timestamp: e.timestamp()
         }
     }
 }
@@ -71,6 +74,7 @@ impl FromBuilder for NullPointerException {
             line: builder.line(),
             path: builder.path(),
             target: Some(builder.target().to_string()),
+            timestamp: builder.timestamp()
         }
     }
 }
@@ -92,6 +96,7 @@ impl DerefException for NullPointerException {
             path: self.path(),
             level: self.level(),
             target: Some(self.target().to_string()),
+            timestamp: self.timestamp()
         }
     }
 }

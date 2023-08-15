@@ -141,3 +141,26 @@ macro_rules! array_out_of_bounds_e {
     };
 }
 
+#[cfg(feature = "macros")]
+#[macro_export]
+macro_rules! unsupported_op_e {
+    ()=>{
+        unsupported_op_e!(ExceptionCode::UNSUPPORTED_OPERATION)
+    };
+    ($Code:expr) =>{unsupported_op_e!($Code,"")};
+    ($Code:expr,$Msg:expr) =>{unsupported_op_e!($Code,$Msg,ExceptionLevel::Info)};
+    ($Code:expr,$Msg:expr,$Level:expr) =>{unsupported_op_e!($Code,$Msg,$Level,line!())};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr) =>{unsupported_op_e!($Code,$Msg,$Level,$Line,PathBuf::from(file!()))};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr)=>{unsupported_op_e!($Code,$Msg,$Level,$Line,$Path,Reasons::Other)};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr,$Reason:expr) => {
+        ExceptionFactory::new::<UnSupportedOpException, UnSupportedOpExceptionBuilder>()
+        .set_code($Code)
+        .set_msg($Msg)
+        .set_level($Level)
+        .set_line($Line)
+        .set_path($Path)
+        .set_reason($Reason)
+        .build();
+    };
+}
+

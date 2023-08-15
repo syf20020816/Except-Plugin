@@ -9,7 +9,8 @@
 //! @description:
 //! ```
 use std::path::PathBuf;
-use super::{Exception, ExceptionLevel, Exceptions};
+use std::time::{Duration};
+use super::{Exception, ExceptionLevel, Exceptions, Reasons};
 
 
 /// # New or From Exception
@@ -90,6 +91,7 @@ pub trait SuperBuilderImpl<T> {
     fn set_msg(&mut self, msg: &str) -> &mut Self;
     fn set_level(&mut self, level: ExceptionLevel) -> &mut Self;
     fn exception_type(&self) -> Exceptions;
+    fn timestamp(&self) -> Duration;
     fn build(&mut self) -> T;
 }
 
@@ -108,8 +110,13 @@ pub trait TargetParamImpl {
 pub trait OutOfBoundsParamImpl {
     fn len(&self) -> usize;
     fn set_len(&mut self, len: usize) -> &mut Self;
-    fn index(&self)->usize;
-    fn set_index(&mut self, index: usize) ->&mut Self;
+    fn index(&self) -> usize;
+    fn set_index(&mut self, index: usize) -> &mut Self;
+}
+
+pub trait UnSupportedParamImpl {
+    fn reason(&self) -> Reasons;
+    fn set_reason(&mut self, reason: Reasons) -> &mut Self;
 }
 
 //------------------------------------------------------------
@@ -161,6 +168,9 @@ macro_rules! builder_impl {
             fn exception_type(&self) -> Exceptions {
                 self.e_type.clone()
             }
+            fn timestamp(&self)->Duration{
+                self.timestamp
+            }
             fn build(&mut self) -> $Output {
                 $Output::from_builder(self.deref())
             }
@@ -211,6 +221,9 @@ macro_rules! exception_impl {
             }
             fn get_type(&self) -> Exceptions {
                 $EType
+            }
+            fn timestamp(&self)->Duration{
+                self.timestamp
             }
         }
     };
@@ -297,6 +310,21 @@ macro_rules! out_of_bounds_impl {
             }
             fn set_index(&mut self, index: usize) -> &mut Self {
                 self.index = index;
+                self
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! unsupported_param_impl {
+    ($E:tt) => {
+        impl UnSupportedParamImpl for $E {
+            fn reason(&self) -> Reasons {
+                self.reason.clone()
+            }
+            fn set_reason(&mut self, reason: Reasons) -> &mut Self {
+                self.reason = reason;
                 self
             }
         }

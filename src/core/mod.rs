@@ -12,14 +12,18 @@ mod easy;
 mod null_pointer;
 mod builder;
 mod index;
+mod sql;
+mod unsupported;
 
 pub use easy::EasyException;
 pub use null_pointer::NullPointerException;
 pub use index::ArrayIndexOutOfBoundsException;
+pub use unsupported::{Reasons, UnSupportedOpException};
 pub use flex_impl::*;
 pub use e_msg::*;
 pub use builder::*;
 
+use std::time::{Duration, SystemTime,  UNIX_EPOCH};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use crate::{display_err_impl, exception_impl};
@@ -37,14 +41,14 @@ pub trait Exception: Error {
     fn set_msg(&mut self, msg: &str) -> ();
     fn set_level(&mut self, level: ExceptionLevel) -> ();
     fn get_type(&self) -> Exceptions;
+    fn timestamp(&self) -> Duration;
 }
 
 /// # Exceptions enum
 /// - Super（顶级异常）：顶级异常只能用于简单的处理，实际上他并不能显式的知道程序到底有什么问题，需要更加具体的异常。它虽然是顶级异常，但却是最低级的异常。
 /// - NullPointerException（空指针异常）：当代码尝试访问一个空对象的方法或属性时抛出。
 /// - ArrayIndexOutOfBoundsException（数组越界异常）：当试图访问数组中不存在的索引位置时抛出。
-/// - IllegalArgumentException（非法参数异常）：当传递给方法的参数不符合要求或无效时抛出。
-/// - IllegalStateException（非法状态异常）：当对象的状态与调用方法的前提条件不符时抛出。
+/// - IllegalArgStateException（非法参数|状态异常）：当传递给方法的参数不符合要求或无效时抛出或对象的状态与调用方法的前提条件不符时抛出。
 /// - IOException（输入/输出异常）：当发生与输入/输出操作相关的错误时抛出，如文件读写错误、网络连接问题等。
 /// - FileNotFoundException（文件未找到异常）：当尝试打开或访问不存在的文件时抛出。
 /// - SQLException（SQL异常）：与数据库操作相关的异常，如连接失败、SQL语句错误等。
@@ -58,8 +62,7 @@ pub enum Exceptions {
     Easy,
     NullPointer,
     ArrayIndexOutOfBounds,
-    IllegalArgument,
-    IllegalState,
+    IllegalArgState,
     IO,
     FileNotFound,
     SQL,
@@ -159,6 +162,7 @@ pub struct SuperException {
     code: u32,
     msg: String,
     level: ExceptionLevel,
+    timestamp: Duration,
 }
 
 
@@ -172,6 +176,7 @@ impl NewFrom for SuperException {
             code: e.code(),
             msg: String::from(e.msg()),
             level: e.level(),
+            timestamp: e.timestamp(),
         }
     }
 }
@@ -184,6 +189,7 @@ impl FromBuilder for SuperException {
             code: builder.code(),
             msg: String::from(builder.msg()),
             level: builder.level(),
+            timestamp: builder.timestamp(),
         }
     }
 }
@@ -198,6 +204,7 @@ impl DerefException for SuperException {
             code: self.code(),
             msg: String::from(self.msg()),
             level: self.level(),
+            timestamp: self.timestamp(),
         }
     }
 }
@@ -208,6 +215,7 @@ impl Default for SuperException {
             code: ExceptionCode::SUPER,
             msg: String::from(SUPER_MSG),
             level: ExceptionLevel::Info,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
         }
     }
 }

@@ -8,12 +8,13 @@
 
 use std::ops::Deref;
 use std::path::PathBuf;
-use crate::{builder_impl, common_param_impl, target_param_impl, out_of_bounds_impl};
-use crate::core::{CommonParamImpl, NullPointerException, TargetParamImpl};
+use std::time::{SystemTime, Duration, UNIX_EPOCH};
+use crate::{builder_impl, common_param_impl, target_param_impl, out_of_bounds_impl, unsupported_param_impl};
+use crate::core::{CommonParamImpl, NullPointerException, TargetParamImpl, UNSUPPORTED_OPERATION_MSG};
 use super::{
     SuperException, Exceptions, ExceptionLevel, SUPER_MSG, EASY_MSG, NULL_POINTER_MSG, OUT_OF_BOUNDS_MSG,
-    ExceptionCode, FromBuilder, SuperBuilderImpl, EasyException,
-    ArrayIndexOutOfBoundsException, OutOfBoundsParamImpl,
+    ExceptionCode, FromBuilder, SuperBuilderImpl, EasyException, Reasons, UnSupportedOpException,
+    ArrayIndexOutOfBoundsException, OutOfBoundsParamImpl, UnSupportedParamImpl,
 };
 
 /// # 异常工厂
@@ -33,6 +34,7 @@ pub struct SuperBuilder {
     code: u32,
     msg: String,
     level: ExceptionLevel,
+    timestamp: Duration,
     e_type: Exceptions,
 }
 
@@ -44,6 +46,7 @@ impl Default for SuperBuilder {
             code: ExceptionCode::SUPER,
             msg: String::from(SUPER_MSG),
             level: ExceptionLevel::Info,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
             e_type: Exceptions::Super,
         }
     }
@@ -57,6 +60,7 @@ pub struct EasyExceptionBuilder {
     level: ExceptionLevel,
     line: u32,
     path: PathBuf,
+    timestamp: Duration,
     e_type: Exceptions,
 }
 
@@ -68,6 +72,7 @@ impl Default for EasyExceptionBuilder {
             level: ExceptionLevel::Info,
             line: 0,
             path: PathBuf::new(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
             e_type: Exceptions::Easy,
         }
     }
@@ -83,6 +88,7 @@ pub struct NullPointerExceptionBuilder {
     code: u32,
     msg: String,
     level: ExceptionLevel,
+    timestamp: Duration,
     line: u32,
     path: PathBuf,
     target: Option<String>,
@@ -95,6 +101,7 @@ impl Default for NullPointerExceptionBuilder {
             code: ExceptionCode::COMMON,
             msg: String::from(NULL_POINTER_MSG),
             level: ExceptionLevel::Info,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
             line: 0,
             path: PathBuf::new(),
             target: None,
@@ -115,6 +122,7 @@ pub struct ArrayIndexOutOfBoundsBuilder {
     code: u32,
     msg: String,
     level: ExceptionLevel,
+    timestamp: Duration,
     line: u32,
     path: PathBuf,
     target: Option<String>,
@@ -129,6 +137,7 @@ impl Default for ArrayIndexOutOfBoundsBuilder {
             code: ExceptionCode::ARRAY_INDEX_OUT_OF,
             msg: String::from(OUT_OF_BOUNDS_MSG),
             level: ExceptionLevel::Info,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
             line: 0,
             path: PathBuf::new(),
             target: None,
@@ -146,3 +155,37 @@ common_param_impl!(ArrayIndexOutOfBoundsBuilder);
 target_param_impl!(ArrayIndexOutOfBoundsBuilder);
 
 out_of_bounds_impl!(ArrayIndexOutOfBoundsBuilder);
+
+//----------------------------------------------------------------
+#[derive(Clone, Debug, PartialEq)]
+pub struct UnSupportedOpExceptionBuilder {
+    code: u32,
+    msg: String,
+    line: u32,
+    path: PathBuf,
+    level: ExceptionLevel,
+    reason: Reasons,
+    e_type: Exceptions,
+    timestamp: Duration,
+}
+
+impl Default for UnSupportedOpExceptionBuilder {
+    fn default() -> Self {
+        UnSupportedOpExceptionBuilder {
+            code: ExceptionCode::UNSUPPORTED_OPERATION,
+            msg: String::from(UNSUPPORTED_OPERATION_MSG),
+            level: ExceptionLevel::Info,
+            reason: Reasons::Other,
+            e_type: Exceptions::UnSupportedOperation,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
+            line: 0,
+            path: PathBuf::new(),
+        }
+    }
+}
+
+builder_impl!(UnSupportedOpExceptionBuilder,UnSupportedOpException);
+
+common_param_impl!(UnSupportedOpExceptionBuilder);
+
+unsupported_param_impl!(UnSupportedOpExceptionBuilder);

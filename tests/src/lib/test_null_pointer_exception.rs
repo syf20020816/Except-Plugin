@@ -16,6 +16,7 @@ pub fn test_null_pointer() -> Result<(), Box<dyn Error>> {
         .set_target("e1")
         .build();
     dbg!(&e);
+    dbg!(&e.timestamp());
     Err(Box::new(
         e
     ))

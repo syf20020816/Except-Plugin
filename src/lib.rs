@@ -45,6 +45,6 @@ mod core;
 pub use crate::core::{
     SuperBuilder, ExceptionLevel, SuperException, Exception, NewFrom, ExceptionFactory, Exceptions, SuperBuilderImpl,
     DerefException, EasyException, NullPointerException, TargetParamImpl, EasyExceptionBuilder, CommonParamImpl,
-    NullPointerExceptionBuilder, ArrayIndexOutOfBoundsException, ArrayIndexOutOfBoundsBuilder,OutOfBoundsParamImpl,
-    ExceptionCode
+    NullPointerExceptionBuilder, ArrayIndexOutOfBoundsException, ArrayIndexOutOfBoundsBuilder, OutOfBoundsParamImpl,
+    ExceptionCode, UnSupportedOpExceptionBuilder, UnSupportedOpException, UnSupportedParamImpl,Reasons
 };
