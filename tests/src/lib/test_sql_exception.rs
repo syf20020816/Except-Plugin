@@ -1,7 +1,8 @@
 use std::error::Error;
 use std::{line, file};
 use std::path::PathBuf;
-use except_plugin::{ExceptionLevel, ExceptionFactory, NewFrom, Reasons, SuperBuilderImpl, DerefException, Exception, TargetParamImpl, CommonParamImpl, ExceptionCode, SQLException, SQLExceptionBuilder, SQLReasons, ReasonParamImpl, SQLParamImpl};
+use std::collections::HashMap;
+use except_plugin::{ExceptionLevel, ExceptionFactory, NewFrom, Reasons, SuperBuilderImpl, DerefException, Exception, TargetParamImpl, CommonParamImpl, ExceptionCode, SQLException, SQLExceptionBuilder, SQLReasons, ReasonParamImpl, SQLParamImpl,sql_e};
 
 pub fn test_sql() -> Result<(), Box<dyn Error>> {
     let e = ExceptionFactory::new::<SQLException, SQLExceptionBuilder>()
@@ -11,7 +12,7 @@ pub fn test_sql() -> Result<(), Box<dyn Error>> {
         .set_level(ExceptionLevel::Warn)
         .set_line(line!())
         .set_path(PathBuf::from(file!()))
-        .set_tips("name","joker")
+        .add_tip("name","joker")
         .set_reason(Reasons::SQL(SQLReasons::Delete))
         .build();
     dbg!(&e);
@@ -20,7 +21,7 @@ pub fn test_sql() -> Result<(), Box<dyn Error>> {
     ))
 }
 
-// pub fn test_unsupport_macro() -> () {
-//     let e = unsupported_op_e!(45,"main thread sleep");
-//     dbg!(e);
-// }
+pub fn test_sql_macro() -> () {
+    let e = sql_e!();
+    dbg!(e);
+}

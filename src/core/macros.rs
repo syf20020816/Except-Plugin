@@ -164,3 +164,36 @@ macro_rules! unsupported_op_e {
     };
 }
 
+#[cfg(feature = "macros")]
+#[macro_export]
+macro_rules! sql_e {
+    ()=>{
+        sql_e!(ExceptionCode::SQL)
+    };
+    ($Code:expr) =>{sql_e!($Code,"")};
+    ($Code:expr,$Msg:expr) =>{sql_e!($Code,$Msg,ExceptionLevel::Info)};
+    ($Code:expr,$Msg:expr,$Level:expr) =>{sql_e!($Code,$Msg,$Level,line!())};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr) =>{sql_e!($Code,$Msg,$Level,$Line,PathBuf::from(file!()))};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr)=>{
+        sql_e!($Code,$Msg,$Level,$Line,$Path,Reasons::SQL(SQLReasons::Query))
+    };
+     ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr,$Reason:expr)=>{
+         sql_e!($Code,$Msg,$Level,$Line,$Path,$Reason,"")
+     };
+     ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr,$Reason:expr,$Stmt:expr)=>{
+         sql_e!($Code,$Msg,$Level,$Line,$Path,$Reason,$Stmt,HashMap::new())
+     };
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr,$Reason:expr,$Stmt:expr,$Tips:expr) => {
+        ExceptionFactory::new::<SQLException, SQLExceptionBuilder>()
+        .set_code($Code)
+        .set_msg($Msg)
+        .set_stmt($Stmt)
+        .set_level($Level)
+        .set_line($Line)
+        .set_path($Path)
+        .set_tips($Tips)
+        .set_reason($Reason)
+        .build();
+    };
+}
+

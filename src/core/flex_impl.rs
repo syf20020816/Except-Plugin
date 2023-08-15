@@ -124,7 +124,8 @@ pub trait SQLParamImpl {
     fn stmt(&self) -> &str;
     fn set_stmt(&mut self, stmt: &str) -> &mut Self;
     fn tips(&self) -> &HashMap<String, String>;
-    fn set_tips(&mut self, k: &str, v: &str) -> &mut Self;
+    fn add_tip(&mut self, k: &str, v: &str) -> &mut Self;
+    fn set_tips(&mut self, tips: HashMap<String, String>) -> &mut Self;
 }
 
 //------------------------------------------------------------
@@ -356,7 +357,11 @@ macro_rules! sql_param_impl {
             fn tips(&self) -> &HashMap<String, String> {
                 &self.tips
             }
-            fn set_tips(&mut self, k: &str, v: &str) -> &mut Self {
+            fn set_tips(&mut self,tips: HashMap<String, String>) -> &mut Self {
+                self.tips = tips;
+                self
+            }
+            fn add_tip(&mut self, k: &str, v: &str) -> &mut Self {
                 self.tips.insert(String::from(k), String::from(v));
                 self
             }
