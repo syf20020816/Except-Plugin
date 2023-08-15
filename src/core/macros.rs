@@ -151,7 +151,7 @@ macro_rules! unsupported_op_e {
     ($Code:expr,$Msg:expr) =>{unsupported_op_e!($Code,$Msg,ExceptionLevel::Info)};
     ($Code:expr,$Msg:expr,$Level:expr) =>{unsupported_op_e!($Code,$Msg,$Level,line!())};
     ($Code:expr,$Msg:expr,$Level:expr,$Line:expr) =>{unsupported_op_e!($Code,$Msg,$Level,$Line,PathBuf::from(file!()))};
-    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr)=>{unsupported_op_e!($Code,$Msg,$Level,$Line,$Path,Reasons::Other)};
+    ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr)=>{unsupported_op_e!($Code,$Msg,$Level,$Line,$Path,Reasons::UnSupported(UnSupportedReasons::Other))};
     ($Code:expr,$Msg:expr,$Level:expr,$Line:expr,$Path:expr,$Reason:expr) => {
         ExceptionFactory::new::<UnSupportedOpException, UnSupportedOpExceptionBuilder>()
         .set_code($Code)

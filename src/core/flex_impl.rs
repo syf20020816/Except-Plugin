@@ -8,6 +8,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::{Duration};
 use super::{Exception, ExceptionLevel, Exceptions, Reasons};
@@ -114,9 +115,16 @@ pub trait OutOfBoundsParamImpl {
     fn set_index(&mut self, index: usize) -> &mut Self;
 }
 
-pub trait UnSupportedParamImpl {
+pub trait ReasonParamImpl {
     fn reason(&self) -> Reasons;
     fn set_reason(&mut self, reason: Reasons) -> &mut Self;
+}
+
+pub trait SQLParamImpl {
+    fn stmt(&self) -> &str;
+    fn set_stmt(&mut self, stmt: &str) -> &mut Self;
+    fn tips(&self) -> &HashMap<String, String>;
+    fn set_tips(&mut self, k: &str, v: &str) -> &mut Self;
 }
 
 //------------------------------------------------------------
@@ -317,14 +325,39 @@ macro_rules! out_of_bounds_impl {
 }
 
 #[macro_export]
-macro_rules! unsupported_param_impl {
+macro_rules! reason_param_impl {
     ($E:tt) => {
-        impl UnSupportedParamImpl for $E {
+        impl ReasonParamImpl for $E {
             fn reason(&self) -> Reasons {
                 self.reason.clone()
             }
             fn set_reason(&mut self, reason: Reasons) -> &mut Self {
                 self.reason = reason;
+                self
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! sql_param_impl {
+    ($E:tt) => {
+        impl SQLParamImpl for $E {
+            fn stmt(&self) -> &str {
+                match self.stmt {
+                    Some(ref s) => s.as_str(),
+                    None => ""
+                }
+            }
+            fn set_stmt(&mut self, stmt: &str) -> &mut Self {
+                self.stmt = Some(stmt.to_string());
+                self
+            }
+            fn tips(&self) -> &HashMap<String, String> {
+                &self.tips
+            }
+            fn set_tips(&mut self, k: &str, v: &str) -> &mut Self {
+                self.tips.insert(String::from(k), String::from(v));
                 self
             }
         }

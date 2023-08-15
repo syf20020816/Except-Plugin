@@ -6,15 +6,17 @@
 //! @description:
 //! ```
 
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::time::{SystemTime, Duration, UNIX_EPOCH};
-use crate::{builder_impl, common_param_impl, target_param_impl, out_of_bounds_impl, unsupported_param_impl};
+use crate::{builder_impl, common_param_impl, target_param_impl, out_of_bounds_impl, reason_param_impl, sql_param_impl};
 use crate::core::{CommonParamImpl, NullPointerException, TargetParamImpl, UNSUPPORTED_OPERATION_MSG};
 use super::{
     SuperException, Exceptions, ExceptionLevel, SUPER_MSG, EASY_MSG, NULL_POINTER_MSG, OUT_OF_BOUNDS_MSG,
     ExceptionCode, FromBuilder, SuperBuilderImpl, EasyException, Reasons, UnSupportedOpException,
-    ArrayIndexOutOfBoundsException, OutOfBoundsParamImpl, UnSupportedParamImpl,
+    ArrayIndexOutOfBoundsException, OutOfBoundsParamImpl, ReasonParamImpl, UnSupportedReasons,
+    SQLReasons, SQLParamImpl, SQL_MSG, SQLException,
 };
 
 /// # 异常工厂
@@ -175,7 +177,7 @@ impl Default for UnSupportedOpExceptionBuilder {
             code: ExceptionCode::UNSUPPORTED_OPERATION,
             msg: String::from(UNSUPPORTED_OPERATION_MSG),
             level: ExceptionLevel::Info,
-            reason: Reasons::Other,
+            reason: Reasons::UnSupported(UnSupportedReasons::Other),
             e_type: Exceptions::UnSupportedOperation,
             timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
             line: 0,
@@ -188,4 +190,44 @@ builder_impl!(UnSupportedOpExceptionBuilder,UnSupportedOpException);
 
 common_param_impl!(UnSupportedOpExceptionBuilder);
 
-unsupported_param_impl!(UnSupportedOpExceptionBuilder);
+reason_param_impl!(UnSupportedOpExceptionBuilder);
+
+//----------------------------------------------------------------
+#[derive(Clone, Debug, PartialEq)]
+pub struct SQLExceptionBuilder {
+    code: u32,
+    msg: String,
+    line: u32,
+    path: PathBuf,
+    level: ExceptionLevel,
+    reason: Reasons,
+    stmt: Option<String>,
+    tips: HashMap<String, String>,
+    timestamp: Duration,
+    e_type: Exceptions,
+}
+
+impl Default for SQLExceptionBuilder {
+    fn default() -> Self {
+        SQLExceptionBuilder {
+            code: ExceptionCode::SQL,
+            msg: String::from(SQL_MSG),
+            level: ExceptionLevel::Info,
+            reason: Reasons::SQL(SQLReasons::Query),
+            stmt: None,
+            e_type: Exceptions::SQL,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
+            line: 0,
+            path: PathBuf::new(),
+            tips: HashMap::new(),
+        }
+    }
+}
+
+builder_impl!(SQLExceptionBuilder,SQLException);
+
+common_param_impl!(SQLExceptionBuilder);
+
+reason_param_impl!(SQLExceptionBuilder);
+
+sql_param_impl!(SQLExceptionBuilder);

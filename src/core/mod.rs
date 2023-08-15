@@ -18,12 +18,13 @@ mod unsupported;
 pub use easy::EasyException;
 pub use null_pointer::NullPointerException;
 pub use index::ArrayIndexOutOfBoundsException;
-pub use unsupported::{Reasons, UnSupportedOpException};
+pub use unsupported::UnSupportedOpException;
+pub use sql::SQLException;
 pub use flex_impl::*;
 pub use e_msg::*;
 pub use builder::*;
 
-use std::time::{Duration, SystemTime,  UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use crate::{display_err_impl, exception_impl};
@@ -115,6 +116,74 @@ pub enum ExceptionLevel {
     Debug,
     Info,
     Trace,
+}
+
+/// # Reason for UnSupported
+#[derive(Debug, PartialEq, Clone)]
+pub enum Reasons {
+    UnSupported(UnSupportedReasons),
+    SQL(SQLReasons),
+    Other(String),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum UnSupportedReasons {
+    /// Illegal value
+    /// such as : a param need u32 , but get value < 0 or None(Option) or bigger than u32::MAX_VALUE
+    Value,
+    /// Illegal type
+    /// such as : a param need u32 , but get bool
+    Type,
+    /// thread block
+    Block,
+    /// cannot get lock
+    Lock,
+    /// cannot access
+    UnAccessible,
+    /// No permission to access
+    Auth,
+    /// IO
+    IO,
+    /// file not found
+    FileNotFound,
+    /// interrupt when thread waiting or sleeping
+    Interrupted,
+    /// conert error
+    ClassCast,
+    /// other reason
+    /// specific reasons need to be set on msg param
+    Other,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum SQLReasons {
+    /// SQL statement error
+    Stmt,
+    /// SQL Logic error
+    Logic,
+    /// no Database
+    NO_DB,
+    /// no table exist
+    NO_Table,
+    /// no column
+    NO_Column,
+    /// no rows
+    NO_Rows,
+    /// empty
+    Empty,
+    /// no authorization
+    NO_Auth,
+    /// no namespace
+    NO_Namespace,
+    /// Insert fail
+    Insert,
+    /// Update fail
+    Update,
+    /// Query fail
+    Query,
+    /// Delete | Drop fail
+    Delete,
+    Other,
 }
 
 /// # Supper Exception

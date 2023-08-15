@@ -3,7 +3,7 @@ use std::{line, file};
 use std::path::PathBuf;
 use except_plugin::{
     ExceptionLevel, ExceptionFactory, NewFrom, Reasons, SuperBuilderImpl, DerefException, Exception, TargetParamImpl, CommonParamImpl,
-    ExceptionCode, UnSupportedOpExceptionBuilder, UnSupportedOpException, UnSupportedParamImpl, unsupported_op_e,
+    ExceptionCode, UnSupportedOpExceptionBuilder, UnSupportedOpException, ReasonParamImpl, unsupported_op_e,UnSupportedReasons
 };
 
 pub fn test_unsupport() -> Result<(), Box<dyn Error>> {
@@ -13,7 +13,7 @@ pub fn test_unsupport() -> Result<(), Box<dyn Error>> {
         .set_level(ExceptionLevel::Warn)
         .set_line(line!())
         .set_path(PathBuf::from(file!()))
-        .set_reason(Reasons::Lock)
+        .set_reason(Reasons::UnSupported(UnSupportedReasons::Block))
         .build();
     dbg!(&e);
     Err(Box::new(
