@@ -1,2 +1,6 @@
 /target
 /Cargo.lock
+.idea
+/tests/target
+/tests/Cargo.lock
+except-plugin.iml

@@ -1,62 +1,3 @@
-<img src="https://img.shields.io/badge/except_plugin-0.0.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584"> <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
-
-# Except-Plugin
-
-- author：syf20020816@outlook.com
-- docName：Except-Plugin README
-- createDate：20230814
-- updateDate：20230814
-- version：0.0.1
-- email：syf20020816@outlook.com
-
-## LICEMSE
-
-MIT
-
-## Except-Plugin Introduction
-
-exception-plugin is a common exception in Rust， which helps developers better control their programs
-
-### Default Support Exception
-
-1. SuperException : It is the top-level implementation of all exceptions , you can get this from all more specific exceptions' recover param .Although it is the parent of all exceptions, it is actually the lowest level exception.
-2. EasyException :  Like SuperException, it also has no special features, but has two additional attributes: error file and error line.
-3. NullPointerException
-4. ArrayIndexOutOfBoundsException
-5. UnSupportedOpException : UnsupportedOpException is a broad error that includes many possible causes, such as lack of permissions, inaccessible files, IO exceptions ...
-6. SQLException : SQLException is an error that may be caused when accessing or manipulating a database, such as no table, empty table data, and no columns ...
-
-## QuickStart
-
-```rust
-use std::error::Error;
-use std::{line, file};
-use std::path::PathBuf;
-use except_plugin::{
-    ExceptionLevel, ExceptionFactory, EasyException, EasyExceptionBuilder, NewFrom, SuperBuilderImpl,
-    DerefException, Exception, TargetParamImpl, CommonParamImpl, easy_e,
-};
-
-pub fn test_easy() -> Result<(), Box<dyn Error>> {
-    /// create a easy exception
-    /// you can use macro to create : easy_e!(666)
-    /// if you wanna use macro , you should add feature : macros
-    let e = ExceptionFactory::new::<EasyException, EasyExceptionBuilder>()
-        .set_code(500)
-        .set_level(ExceptionLevel::Warn)
-        .set_line(line!())
-        .set_path(PathBuf::from(file!()))
-        .build();
-    dbg!(&e);
-    Err(Box::new(
-        e
-    ))
-}
-```
-
-## Define a self Exception
-
-```rust
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::Deref;
@@ -176,4 +117,3 @@ pub fn test_my_exception() -> () {
         .build();
     dbg!(my_e);
 }
-```

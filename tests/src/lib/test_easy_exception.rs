@@ -20,6 +20,6 @@ pub fn test_easy() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn test_easy_macro() -> () {
-    // let e = easy_e!(666,"666");
-    // dbg!(e);
+    let e = easy_e!(666);
+    dbg!(e);
 }

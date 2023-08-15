@@ -1,7 +1,12 @@
 [package]
 name = "except-plugin"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+description = "exception-plugin is a common exception in Rust , which helps developers better control their programs"
+authors = ["syf20020816@outlook.com"]
+license = "MIT"
+repository = "https://github.com/syf20020816/Except-Plugin"
+keywords = ["error", "exception", "plugin", "except"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

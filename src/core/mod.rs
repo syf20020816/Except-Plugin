@@ -73,6 +73,12 @@ pub enum Exceptions {
     Define,
 }
 
+impl Default for Exceptions{
+    fn default() -> Self {
+        Exceptions::Define
+    }
+}
+
 /// # Exception Code 异常码
 /// - common exception or supper exception should use 101
 /// - you may need to define exception code
@@ -118,12 +124,24 @@ pub enum ExceptionLevel {
     Trace,
 }
 
+impl Default for ExceptionLevel{
+    fn default() -> Self {
+        ExceptionLevel::Info
+    }
+}
+
 /// # Reason for UnSupported
 #[derive(Debug, PartialEq, Clone)]
 pub enum Reasons {
     UnSupported(UnSupportedReasons),
     SQL(SQLReasons),
     Other(String),
+}
+
+impl Default for Reasons{
+    fn default() -> Self {
+        Reasons::Other(String::new())
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

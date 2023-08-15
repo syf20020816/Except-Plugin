@@ -11,6 +11,7 @@ use crate::lib::test_null_pointer_exception::{test_null_pointer, test_null_point
 use crate::lib::test_array_out_of_bounds_exception::{test_out_of_bounds, test_out_of_bounds_macro};
 use crate::lib::test_unsupported_exception::{test_unsupport, test_unsupport_macro};
 use crate::lib::test_sql_exception::{test_sql, test_sql_macro};
+use crate::lib::define_exception::test_my_exception;
 use except_plugin::{
     super_e, SuperException, SuperBuilderImpl, NewFrom, easy_e, EasyException,
     CommonParamImpl, EasyExceptionBuilder, ExceptionFactory, ExceptionCode, ExceptionLevel,
@@ -40,5 +41,6 @@ fn main() {
     //     }
     // }
     // let _ = test_unsupport_macro();
-    let _ = test_sql_macro();
+    // let _ = test_sql_macro();
+    let _ = test_my_exception();
 }

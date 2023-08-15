@@ -14,7 +14,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use super::{SQL_MSG, SQLExceptionBuilder, ReasonParamImpl, SuperBuilderImpl, SQLParamImpl, ExceptionLevel, NewFrom, FromBuilder, CommonParamImpl, Exception, Exceptions, ExceptionCode, DerefException};
 use crate::{display_err_impl, exception_impl, common_param_impl, reason_param_impl, sql_param_impl, Reasons, SQLReasons};
 
-/// # UnSupportedOperationException
+/// # SQLException
 /// - code: exception code
 /// - msg: exception msg
 /// - line: error line
