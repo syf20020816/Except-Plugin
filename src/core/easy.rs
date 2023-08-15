@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use super::{NewFrom, FromBuilder, EasyExceptionBuilder, CommonParamImpl, EASY_MSG, ExceptionCode, SuperBuilderImpl};
-use crate::{DerefException, display_err_impl, Exception, exception_impl, ExceptionLevel, Exceptions};
+use crate::{DerefException, display_err_impl, Exception, exception_impl, common_param_impl, ExceptionLevel, Exceptions};
 
 /// # Easy Exception
 /// - code: exception code
@@ -71,24 +71,10 @@ impl FromBuilder for EasyException {
 }
 
 display_err_impl!(EasyException);
+
 exception_impl!(EasyException,Exceptions::Easy);
 
-impl CommonParamImpl for EasyException {
-    fn line(&self) -> u32 {
-        self.line
-    }
-    fn path(&self) -> PathBuf {
-        self.path.clone()
-    }
-    fn set_path(&mut self, path: PathBuf) -> &mut Self {
-        self.path = path;
-        self
-    }
-    fn set_line(&mut self, line: u32) -> &mut Self {
-        self.line = line;
-        self
-    }
-}
+common_param_impl!(EasyException);
 
 impl DerefException for EasyException {
     fn deref_mut_exception(&mut self) -> Self {

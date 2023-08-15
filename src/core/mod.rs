@@ -5,15 +5,17 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-
+mod macros;
 mod e_msg;
 mod flex_impl;
 mod easy;
 mod null_pointer;
 mod builder;
+mod index;
 
 pub use easy::EasyException;
 pub use null_pointer::NullPointerException;
+pub use index::ArrayIndexOutOfBoundsException;
 pub use flex_impl::*;
 pub use e_msg::*;
 pub use builder::*;
@@ -74,7 +76,7 @@ pub struct ExceptionCode(u32);
 
 impl ExceptionCode {
     pub const COMMON: u32 = 101;
-    pub const SUPPER: u32 = 102;
+    pub const SUPER: u32 = 102;
     pub const NULL_POINTER: u32 = 1000;
     pub const ARRAY_INDEX_OUT_OF: u32 = 1100;
     pub const ILLEGAL_ARGUMENT: u32 = 1200;
@@ -203,8 +205,8 @@ impl DerefException for SuperException {
 impl Default for SuperException {
     fn default() -> Self {
         SuperException {
-            code: ExceptionCode::SUPPER,
-            msg: String::from(SUPPER_MSG),
+            code: ExceptionCode::SUPER,
+            msg: String::from(SUPER_MSG),
             level: ExceptionLevel::Info,
         }
     }

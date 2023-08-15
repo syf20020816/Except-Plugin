@@ -8,11 +8,12 @@
 
 use std::ops::Deref;
 use std::path::PathBuf;
-use crate::{builder_impl};
-use crate::core::{CommonParamImpl, NullPointerException, TargetParam};
+use crate::{builder_impl, common_param_impl, target_param_impl, out_of_bounds_impl};
+use crate::core::{CommonParamImpl, NullPointerException, TargetParamImpl};
 use super::{
-    SuperException, Exceptions, ExceptionLevel, SUPPER_MSG, EASY_MSG,
+    SuperException, Exceptions, ExceptionLevel, SUPER_MSG, EASY_MSG, NULL_POINTER_MSG, OUT_OF_BOUNDS_MSG,
     ExceptionCode, FromBuilder, SuperBuilderImpl, EasyException,
+    ArrayIndexOutOfBoundsException, OutOfBoundsParamImpl,
 };
 
 /// # 异常工厂
@@ -40,15 +41,15 @@ builder_impl!(SuperBuilder,SuperException);
 impl Default for SuperBuilder {
     fn default() -> Self {
         SuperBuilder {
-            code: ExceptionCode::SUPPER,
-            msg: String::from(SUPPER_MSG),
+            code: ExceptionCode::SUPER,
+            msg: String::from(SUPER_MSG),
             level: ExceptionLevel::Info,
             e_type: Exceptions::Super,
         }
     }
 }
 
-
+//----------------------------------------------------------
 #[derive(Clone, Debug, PartialEq)]
 pub struct EasyExceptionBuilder {
     code: u32,
@@ -74,22 +75,7 @@ impl Default for EasyExceptionBuilder {
 
 builder_impl!(EasyExceptionBuilder,EasyException);
 
-impl CommonParamImpl for EasyExceptionBuilder {
-    fn path(&self) -> PathBuf {
-        self.path.clone()
-    }
-    fn line(&self) -> u32 {
-        self.line
-    }
-    fn set_path(&mut self, path: PathBuf) -> &mut Self {
-        self.path = path;
-        self
-    }
-    fn set_line(&mut self, line: u32) -> &mut Self {
-        self.line = line;
-        self
-    }
-}
+common_param_impl!(EasyExceptionBuilder);
 
 //----------------------------------------------------------------
 #[derive(Clone, Debug, PartialEq)]
@@ -107,7 +93,7 @@ impl Default for NullPointerExceptionBuilder {
     fn default() -> Self {
         NullPointerExceptionBuilder {
             code: ExceptionCode::COMMON,
-            msg: String::from(EASY_MSG),
+            msg: String::from(NULL_POINTER_MSG),
             level: ExceptionLevel::Info,
             line: 0,
             path: PathBuf::new(),
@@ -119,32 +105,44 @@ impl Default for NullPointerExceptionBuilder {
 
 builder_impl!(NullPointerExceptionBuilder,NullPointerException);
 
-impl CommonParamImpl for NullPointerExceptionBuilder {
-    fn path(&self) -> PathBuf {
-        self.path.clone()
-    }
-    fn line(&self) -> u32 {
-        self.line
-    }
-    fn set_path(&mut self, path: PathBuf) -> &mut Self {
-        self.path = path;
-        self
-    }
-    fn set_line(&mut self, line: u32) -> &mut Self {
-        self.line = line;
-        self
+common_param_impl!(NullPointerExceptionBuilder);
+
+target_param_impl!(NullPointerExceptionBuilder);
+
+//----------------------------------------------------------------
+#[derive(Clone, Debug, PartialEq)]
+pub struct ArrayIndexOutOfBoundsBuilder {
+    code: u32,
+    msg: String,
+    level: ExceptionLevel,
+    line: u32,
+    path: PathBuf,
+    target: Option<String>,
+    len: usize,
+    index: usize,
+    e_type: Exceptions,
+}
+
+impl Default for ArrayIndexOutOfBoundsBuilder {
+    fn default() -> Self {
+        ArrayIndexOutOfBoundsBuilder {
+            code: ExceptionCode::ARRAY_INDEX_OUT_OF,
+            msg: String::from(OUT_OF_BOUNDS_MSG),
+            level: ExceptionLevel::Info,
+            line: 0,
+            path: PathBuf::new(),
+            target: None,
+            len: 0,
+            index: 0,
+            e_type: Exceptions::ArrayIndexOutOfBounds,
+        }
     }
 }
 
-impl TargetParam for NullPointerExceptionBuilder {
-    fn target(&self) -> &str {
-        match self.target {
-            Some(ref s) => s.as_str(),
-            None => ""
-        }
-    }
-    fn set_target(&mut self, target: &str) -> &mut Self {
-        self.target = Some(target.to_string());
-        self
-    }
-}
+builder_impl!(ArrayIndexOutOfBoundsBuilder,ArrayIndexOutOfBoundsException);
+
+common_param_impl!(ArrayIndexOutOfBoundsBuilder);
+
+target_param_impl!(ArrayIndexOutOfBoundsBuilder);
+
+out_of_bounds_impl!(ArrayIndexOutOfBoundsBuilder);

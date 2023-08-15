@@ -10,8 +10,8 @@
 use std::error::Error;
 use std::path::{PathBuf};
 use std::fmt::{Debug, Display, Formatter};
-use super::{SuperBuilderImpl, ExceptionLevel, NewFrom, FromBuilder, CommonParamImpl, TargetParam, Exception, Exceptions, NullPointerExceptionBuilder, NULL_POINTER_MSG, ExceptionCode, DerefException};
-use crate::{display_err_impl,  exception_impl};
+use super::{SuperBuilderImpl, ExceptionLevel, NewFrom, FromBuilder, CommonParamImpl, TargetParamImpl, Exception, Exceptions, NullPointerExceptionBuilder, NULL_POINTER_MSG, ExceptionCode, DerefException};
+use crate::{display_err_impl, exception_impl, common_param_impl, target_param_impl};
 
 /// # NullPointerException
 /// - code: exception code
@@ -79,35 +79,9 @@ display_err_impl!(NullPointerException);
 
 exception_impl!(NullPointerException,Exceptions::NullPointer);
 
-impl CommonParamImpl for NullPointerException {
-    fn line(&self) -> u32 {
-        self.line
-    }
-    fn path(&self) -> PathBuf {
-        self.path.clone()
-    }
-    fn set_path(&mut self, path: PathBuf) -> &mut Self {
-        self.path = path;
-        self
-    }
-    fn set_line(&mut self, line: u32) -> &mut Self {
-        self.line = line;
-        self
-    }
-}
+common_param_impl!(NullPointerException);
 
-impl TargetParam for NullPointerException {
-    fn target(&self) -> &str {
-        match self.target {
-            Some(ref s)=>s.as_str(),
-            None=>""
-        }
-    }
-    fn set_target(&mut self, target: &str) -> &mut Self {
-        self.target = Some(target.to_string());
-        self
-    }
-}
+target_param_impl!(NullPointerException);
 
 impl DerefException for NullPointerException {
     fn deref_mut_exception(&mut self) -> Self {

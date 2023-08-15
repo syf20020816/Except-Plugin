@@ -100,9 +100,16 @@ pub trait CommonParamImpl {
     fn set_path(&mut self, path: PathBuf) -> &mut Self;
 }
 
-pub trait TargetParam {
+pub trait TargetParamImpl {
     fn target(&self) -> &str;
     fn set_target(&mut self, target: &str) -> &mut Self;
+}
+
+pub trait OutOfBoundsParamImpl {
+    fn len(&self) -> usize;
+    fn set_len(&mut self, len: usize) -> &mut Self;
+    fn index(&self)->usize;
+    fn set_index(&mut self, index: usize) ->&mut Self;
 }
 
 //------------------------------------------------------------
@@ -232,4 +239,66 @@ macro_rules! e_new_from_impl {
     };
 }
 
+#[macro_export]
+macro_rules! common_param_impl {
+    ($E:tt) => {
+        impl CommonParamImpl for $E {
+            fn line(&self) -> u32 {
+                self.line
+            }
+            fn path(&self) -> PathBuf {
+                self.path.clone()
+            }
+            fn set_path(&mut self, path: PathBuf) -> &mut Self {
+                self.path = path;
+                self
+            }
+            fn set_line(&mut self, line: u32) -> &mut Self {
+                self.line = line;
+                self
+            }
+        }
+    };
+}
 
+/// # macro for TargetParamImpl
+#[macro_export]
+macro_rules! target_param_impl {
+    ($E:tt) => {
+        impl TargetParamImpl for $E {
+            fn target(&self) -> &str {
+                match self.target {
+                    Some(ref s) => s.as_str(),
+                    None => ""
+                }
+            }
+            fn set_target(&mut self, target: &str) -> &mut Self {
+                self.target = Some(target.to_string());
+                self
+            }
+        }
+    };
+}
+
+/// # macro for OutOfBoundsImpl
+#[macro_export]
+macro_rules! out_of_bounds_impl {
+    ($E:tt) => {
+        impl OutOfBoundsParamImpl for $E{
+            fn len(&self) -> usize {
+                self.len
+            }
+            fn set_len(&mut self, len: usize) -> &mut Self {
+                self.len = len;
+                self
+            }
+            fn index(&self) -> usize {
+                self.index
+            }
+            fn set_index(&mut self, index: usize) -> &mut Self {
+                self.index = index;
+                self
+            }
+        }
+    };
+}
